@@ -41,11 +41,8 @@
 
 ## Availability
 
-- ID 
 - Professor_ID
-- DayOfWeek
-- StartTime 
-- EndTime
+- TimeSlot_ID
 
 ## Classroom
 

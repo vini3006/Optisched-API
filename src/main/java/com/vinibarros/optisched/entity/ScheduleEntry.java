@@ -1,0 +1,40 @@
+package com.vinibarros.optisched.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "schedule_entry")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ScheduleEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "professor_id", nullable = false)
+    private Professor professor;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "subject_offering_id", nullable = false)
+    private SubjectOffering subjectOffering;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private Classroom classroom;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "time_slot_id", nullable = false)
+    private TimeSlot timeSlot;
+}

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: optisched-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - optisched_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U optisched_user -d optisched"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  optisched_pgdata:

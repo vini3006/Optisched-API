@@ -226,7 +226,7 @@ src
     │       ├── controller
     │       ├── service
     │       ├── repository
-    │       ├── model
+    │       ├── entity
     │       ├── dto
     │       ├── config
     │       ├── optimization
