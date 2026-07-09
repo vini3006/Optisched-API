@@ -53,6 +53,10 @@ public class ProfessorService {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor", id));
 
+        if(!professor.getEmail().equals(request.email()) && professorRepository.existsByEmail(request.email())){
+            throw new DuplicateResourceException("Professor", "email", request.email());
+        }
+
         professor.setName(request.name());
         professor.setEmail(request.email());
 
