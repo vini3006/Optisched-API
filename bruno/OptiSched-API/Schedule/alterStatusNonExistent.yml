@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: localhost:8080/schedules/1/status
+  url: localhost:8080/schedules/999/status
   auth: inherit
 
 settings:
