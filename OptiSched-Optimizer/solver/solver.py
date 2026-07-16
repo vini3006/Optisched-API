@@ -1,10 +1,10 @@
 from highspy import Highs, HighsModelStatus
 from models import OptimizationResponse
 
-from mapper import SolverData
+from mapper import SolverData, ObjectiveWeights
 from .variables import create_variables, create_auxiliary_variables
 from .constraints import add_all_constraints
-from .objective import build_objective, ObjectiveWeights
+from .objective import build_objective
 from .extractor import extract_solution
 
 def solve_scheduling_problem(data: SolverData, weights: ObjectiveWeights = ObjectiveWeights(), debug_mode: bool = True) -> OptimizationResponse | None:
@@ -30,7 +30,7 @@ def solve_scheduling_problem(data: SolverData, weights: ObjectiveWeights = Objec
     add_all_constraints(model, data, variables, auxiliary)
 
     # 4. Configure the Objective Function
-    build_objective(model, auxiliary, weights)
+    build_objective(model, auxiliary, data)
 
     # 5. Execute the optimization
     run_status = model.run()

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from models import OptimizationRequest
+from models import OptimizationRequest, ObjectiveWeightsDTO
 from validation import *
 from enums import DayOfWeek     
 
@@ -16,6 +16,13 @@ from enums import DayOfWeek
 # the sets and parameters required by the MILP model.
 #
 # ==========================================================
+
+@dataclass(frozen=True)
+class ObjectiveWeights:
+    alpha: float = 1.0
+    beta: float = 1.0
+    gamma: float = 1.0
+    delta: float = 1.0
 
 @dataclass
 class SolverData:
@@ -85,6 +92,8 @@ class SolverData:
     # Subject offerings that cannot occur simultaneously
     # (same course + recommended semester)
     conflicts: set[tuple[int, int]]
+
+    objective_weights: ObjectiveWeights
 
 # ==========================================================
 # Mapper
@@ -252,6 +261,17 @@ def build_solver_data(request: OptimizationRequest) -> SolverData:
     validate_classroom_capacity(subject_offerings = request.subject_offerings, classrooms = request.classrooms)
 
     # ======================================================
+    # Weights
+    # =====================================================
+
+    weights = ObjectiveWeights(
+        alpha=request.objective_weights.alpha,
+        beta=request.objective_weights.beta,
+        gamma=request.objective_weights.gamma,
+        delta=request.objective_weights.delta,
+    )
+
+    # ======================================================
     # Return SolverData
     # =====================================================
 
@@ -268,5 +288,6 @@ def build_solver_data(request: OptimizationRequest) -> SolverData:
         expected_students=expected_students,
         classroom_capacity=classroom_capacity,
         conflicts=conflicts,
+        objective_weights=weights
     )
 

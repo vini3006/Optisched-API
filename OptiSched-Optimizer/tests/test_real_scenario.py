@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import pytest
 from solver import solve_scheduling_problem
-from mapper import SolverData  
+from mapper import SolverData, ObjectiveWeights
 
 def test_realistic_integration_scenario():
     """
@@ -176,6 +176,8 @@ def test_realistic_integration_scenario():
         classroom_capacity=capacities,
 
         conflicts=conflicts,
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(

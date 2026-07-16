@@ -8,7 +8,7 @@ import pytest
 from highspy import Highs
 
 from solver import solve_scheduling_problem
-from mapper import SolverData  
+from mapper import SolverData, ObjectiveWeights
 
 # ==============================================================================
 # SANITY TEST CASES
@@ -71,7 +71,9 @@ def test_feasible_minimal_schedule():
         classroom_capacity={
             room_id: 40  # Room fits the students (40 >= 30)
         },
-        conflicts=set()  # No conflicts in this basic run
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)  # No conflicts in this basic run
     )
 
     # 3. Run solver
@@ -135,7 +137,9 @@ def test_infeasible_professor_insufficient_availability():
         classroom_capacity={
             room_id: 40
         },
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     # Run solver

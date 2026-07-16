@@ -4,14 +4,11 @@ from highspy import Highs
 
 from .variables import AuxiliaryVariables
 
-@dataclass(frozen=True)
-class ObjectiveWeights:
-    alpha: float = 1.0
-    beta: float = 1.0
-    gamma: float = 1.0
-    delta: float = 1.0
+from mapper import SolverData
 
-def build_objective(model: Highs, auxiliary: AuxiliaryVariables, weights: ObjectiveWeights) -> None:
+def build_objective(model: Highs, auxiliary: AuxiliaryVariables, data: SolverData) -> None:
+
+    weights = data.objective_weights
 
     # ======================================================
     # S1 - Timetable Holes

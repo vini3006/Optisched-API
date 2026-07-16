@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import pytest
 from solver import solve_scheduling_problem
-from mapper import SolverData  
+from mapper import SolverData, ObjectiveWeights
 
 
 # ==============================================================================
@@ -65,7 +65,9 @@ def test_professor_collision_prevention():
             room_1: 30,
             room_2: 30
         },
-        conflicts=set()  # No group conflicts, only the professor bottleneck
+        conflicts=set(),
+          
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)  # No group conflicts, only the professor bottleneck
     )
 
     # Run solver
@@ -127,7 +129,9 @@ def test_classroom_capacity_constraint():
             room_small: 30,  # Cannot fit
             room_large: 60   # Can fit!
         },
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     # Run solver
@@ -200,7 +204,9 @@ def test_student_group_conflict_prevention():
         conflicts={
             (offering_a, offering_b),
             (offering_b, offering_a)
-        }
+        },
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     # Run solver
@@ -287,7 +293,9 @@ def test_classroom_collision_prevention():
             room_id: 30,
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -377,7 +385,9 @@ def test_professor_qualification_constraint():
             room_id: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -460,7 +470,9 @@ def test_unique_professor_assignment():
             room: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -543,7 +555,9 @@ def test_required_time_slots():
             room_id: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -624,7 +638,9 @@ def test_professor_availability_constraint():
             room_id: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -709,7 +725,9 @@ def test_classroom_stability_objective():
             room_b: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)
@@ -802,7 +820,9 @@ def test_distribution_along_week_objective():
             room: 30
         },
 
-        conflicts=set()
+        conflicts=set(),
+
+        objective_weights=ObjectiveWeights(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0)
     )
 
     response = solve_scheduling_problem(data, debug_mode=False)

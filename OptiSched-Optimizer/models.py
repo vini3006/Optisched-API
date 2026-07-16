@@ -30,11 +30,18 @@ class TimeSlot(BaseModel):
     start_time: time
     end_time: time
 
+class ObjectiveWeightsDTO(BaseModel):
+    alpha: float = 1.0
+    beta: float = 1.0
+    gamma: float = 1.0
+    delta: float = 1.0
+
 class OptimizationRequest(BaseModel):
     professors: list[Professor]
     subject_offerings: list[SubjectOffering]
     classrooms: list[Classroom]
     time_slots: list[TimeSlot]
+    objective_weights: ObjectiveWeightsDTO = ObjectiveWeightsDTO()
 
 # =========================
 # Output DTOs
