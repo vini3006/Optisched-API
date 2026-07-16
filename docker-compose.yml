@@ -12,10 +12,38 @@ services:
     volumes:
       - optisched_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U optisched_user -d optisched"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  optimizer:
+    build:
+      context: ./OptiSched-Optimizer
+    container_name: optisched-optimizer
+    restart: always
+    ports:
+      - "8000:8000"
+
+  api:
+    build:
+      context: ./OptiSched-API
+    container_name: optisched-api
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      OPTIMIZER_URL: http://optimizer:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      optimizer:
+        condition: service_started
 
 volumes:
   optisched_pgdata:

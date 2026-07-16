@@ -1,0 +1,6 @@
+.optivenv/
+__pycache__/
+.pytest_cache/
+.vscode/
+*.pyc
+.git/
