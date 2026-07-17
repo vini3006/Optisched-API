@@ -3,7 +3,9 @@ package com.vinibarros.optisched.optimization;
 import com.vinibarros.optisched.dto.optimization.*;
 import com.vinibarros.optisched.dto.response.ScheduleResponse;
 import com.vinibarros.optisched.entity.*;
+import com.vinibarros.optisched.enums.ScheduleStatus;
 import com.vinibarros.optisched.exception.InvalidScheduleException;
+import com.vinibarros.optisched.exception.NoScheduleEntriesException;
 import com.vinibarros.optisched.exception.ResourceNotFoundException;
 import com.vinibarros.optisched.mapper.ScheduleMapper;
 import com.vinibarros.optisched.repository.*;
@@ -76,7 +78,14 @@ public class ScheduleGenerationService {
 
         OptimizationResponse response = optimizerClient.optimize(request);
 
+        if (response == null || response.scheduleEntries() == null) {
+            throw new NoScheduleEntriesException("The optimizer did not found any feasible entry.   ");
+        }
+
         Schedule schedule = scheduleMapper.toEntity(semester);
+        schedule.setGeneratedAt(LocalDateTime.now());
+        schedule.setStatus(ScheduleStatus.ACTIVE);
+
         Schedule saved = scheduleRepository.save(schedule);
         ScheduleResponse scheduleResponse = scheduleMapper.toResponse(saved);
 

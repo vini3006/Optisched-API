@@ -16,6 +16,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - optisched-network
 
   optimizer:
     build:
@@ -24,6 +26,13 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+        - optisched-network
 
   api:
     build:
@@ -43,7 +52,13 @@ services:
       postgres:
         condition: service_healthy
       optimizer:
-        condition: service_started
+        condition: service_healthy
+    networks:
+      - optisched-network
 
 volumes:
   optisched_pgdata:
+
+networks:
+  optisched-network:
+    driver: bridge

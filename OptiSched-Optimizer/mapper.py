@@ -282,6 +282,7 @@ def build_solver_data(request: OptimizationRequest) -> SolverData:
         time_slots=time_slots,
         time_slots_by_day=grouped_slots,
         slot_position=slot_position,
+        slot_day=slot_day,
         valid_qualifications=valid_qualifications,
         valid_availabilities=valid_availabilities,
         required_time_slots=required_time_slots,

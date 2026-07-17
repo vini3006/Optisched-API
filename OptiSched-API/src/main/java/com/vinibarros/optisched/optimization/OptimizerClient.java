@@ -3,8 +3,12 @@ package com.vinibarros.optisched.optimization;
 import com.vinibarros.optisched.dto.optimization.OptimizationRequest;
 import com.vinibarros.optisched.dto.optimization.OptimizationResponse;
 import com.vinibarros.optisched.exception.InvalidScheduleException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 @Component
@@ -16,6 +20,11 @@ public class OptimizerClient {
         this.restClient = restClient;
     }
 
+    @Retryable(
+            retryFor = { ResourceAccessException.class, HttpServerErrorException.InternalServerError.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2.0)
+    )
     public OptimizationResponse optimize(OptimizationRequest request){
         try {
             return restClient.post().uri("/api/optimize").body(request).retrieve().body(OptimizationResponse.class);
