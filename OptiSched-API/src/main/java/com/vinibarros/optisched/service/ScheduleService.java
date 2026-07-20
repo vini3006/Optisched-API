@@ -2,11 +2,13 @@ package com.vinibarros.optisched.service;
 
 import com.vinibarros.optisched.dto.request.ScheduleRequest;
 import com.vinibarros.optisched.dto.response.ScheduleResponse;
+import com.vinibarros.optisched.entity.Institution;
 import com.vinibarros.optisched.entity.Schedule;
 import com.vinibarros.optisched.entity.Semester;
 import com.vinibarros.optisched.enums.ScheduleStatus;
 import com.vinibarros.optisched.exception.ResourceNotFoundException;
 import com.vinibarros.optisched.mapper.ScheduleMapper;
+import com.vinibarros.optisched.repository.InstitutionRepository;
 import com.vinibarros.optisched.repository.ScheduleRepository;
 import com.vinibarros.optisched.repository.SemesterRepository;
 import org.springframework.stereotype.Service;
@@ -20,25 +22,32 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final SemesterRepository semesterRepository;
+    private final InstitutionRepository institutionRepository;
     private final ScheduleMapper scheduleMapper;
 
-    public ScheduleService(ScheduleRepository scheduleRepository, SemesterRepository semesterRepository, ScheduleMapper scheduleMapper){
+    public ScheduleService(ScheduleRepository scheduleRepository, SemesterRepository semesterRepository, InstitutionRepository institutionRepository, ScheduleMapper scheduleMapper){
         this.scheduleRepository = scheduleRepository;
         this.semesterRepository = semesterRepository;
+        this.institutionRepository = institutionRepository;
         this.scheduleMapper = scheduleMapper;
     }
 
     @Transactional
-    public ScheduleResponse create(ScheduleRequest request){
-        Semester semester = semesterRepository.findById(request.semesterId())
+    public ScheduleResponse create(ScheduleRequest request, Long institutionId){
+        Semester semester = semesterRepository.findByIdAndInstitutionId(request.semesterId(), institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Semester", request.semesterId()));
 
-        if(scheduleRepository.existsBySemesterIdAndStatus(request.semesterId(), ScheduleStatus.ACTIVE)){
-            Schedule deactivated = scheduleRepository.findBySemesterIdAndStatus(request.semesterId(), ScheduleStatus.ACTIVE);
-            deactivated.setStatus(ScheduleStatus.INACTIVE);
+        Institution institution = institutionRepository.findById(institutionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution", institutionId));
+
+        if(scheduleRepository.existsBySemesterIdAndStatusAndInstitutionId(request.semesterId(), ScheduleStatus.ACTIVE, institutionId)){
+            Schedule deactivated = scheduleRepository.findBySemesterIdAndStatusAndInstitutionId(request.semesterId(), ScheduleStatus.ACTIVE, institutionId);
+            if (deactivated != null) {
+                deactivated.setStatus(ScheduleStatus.INACTIVE);
+            }
         }
 
-        Schedule schedule = scheduleMapper.toEntity(semester);
+        Schedule schedule = scheduleMapper.toEntity(semester, institution);
         schedule.setGeneratedAt(LocalDateTime.now());
         schedule.setStatus(ScheduleStatus.ACTIVE);
 
@@ -47,29 +56,29 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public ScheduleResponse findById(Long id){
-        Schedule schedule = scheduleRepository.findById(id)
+    public ScheduleResponse findById(Long id, Long institutionId){
+        Schedule schedule = scheduleRepository.findByIdAndInstitutionId(id, institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Schedule", id));
         return scheduleMapper.toResponse(schedule);
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> findAll(){
-        return scheduleRepository.findAll()
+    public List<ScheduleResponse> findAll(Long institutionId){
+        return scheduleRepository.findAllByInstitutionId(institutionId)
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();
     }
 
     @Transactional
-    public ScheduleResponse alterStatus(Long id){
-        Schedule schedule = scheduleRepository.findById(id)
+    public ScheduleResponse alterStatus(Long id, Long institutionId){
+        Schedule schedule = scheduleRepository.findByIdAndInstitutionId(id, institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Schedule", id));
 
         if(schedule.getStatus() == ScheduleStatus.ACTIVE){
             schedule.setStatus(ScheduleStatus.INACTIVE);
         } else {
-            Schedule active = scheduleRepository.findBySemesterIdAndStatus(schedule.getSemester().getId(), ScheduleStatus.ACTIVE);
+            Schedule active = scheduleRepository.findBySemesterIdAndStatusAndInstitutionId(schedule.getSemester().getId(), ScheduleStatus.ACTIVE, institutionId);
 
             if(active != null){
                 active.setStatus(ScheduleStatus.INACTIVE);
@@ -83,8 +92,8 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void delete(Long id){
-        if(!scheduleRepository.existsById(id)){
+    public void delete(Long id, Long institutionId){
+        if(!scheduleRepository.existsByIdAndInstitutionId(id, institutionId)){
             throw new ResourceNotFoundException("Schedule", id);
         }
         scheduleRepository.deleteById(id);

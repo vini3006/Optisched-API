@@ -24,6 +24,10 @@ public class Course {
     @Column(nullable = false)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
+
     @OneToMany(mappedBy = "course")
     private Set<SubjectOffering> offerings = new HashSet<>();
 }

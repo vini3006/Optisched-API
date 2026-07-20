@@ -46,8 +46,15 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       OPTIMIZER_URL: http://optimizer:8000
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PRIVATE_KEY: file:/app.key
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_PUBLIC_KEY: file:/app.pub
+      SPRING_FLYWAY_PLACEHOLDERS_SUPERADMIN_EMAIL: ${SUPER_ADMIN_EMAIL}
+      SPRING_FLYWAY_PLACEHOLDERS_SUPERADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD_HASH}
     ports:
       - "8080:8080"
+    volumes:
+      - ./app.key:/app.key
+      - ./app.pub:/app.pub
     depends_on:
       postgres:
         condition: service_healthy

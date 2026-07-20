@@ -66,21 +66,22 @@ public class ScheduleEntryService {
         scheduleEntry.setProfessor(professor);
         scheduleEntry.setClassroom(classroom);
         scheduleEntry.setTimeSlot(timeSlot);
+        scheduleEntry.setInstitution(schedule.getInstitution());
 
         ScheduleEntry saved = scheduleEntryRepository.save(scheduleEntry);
         return scheduleEntryMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public ScheduleEntryResponse findById(Long id){
-        ScheduleEntry scheduleEntry = scheduleEntryRepository.findById(id)
+    public ScheduleEntryResponse findById(Long id, Long institutionId){
+        ScheduleEntry scheduleEntry = scheduleEntryRepository.findByIdAndInstitutionId(id, institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("ScheduleEntry", id));
         return scheduleEntryMapper.toResponse(scheduleEntry);
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleEntryResponse> findBySchedule(Long scheduleId){
-        if(!scheduleRepository.existsById(scheduleId)){
+    public List<ScheduleEntryResponse> findBySchedule(Long scheduleId, Long institutionId){
+        if(!scheduleRepository.existsByIdAndInstitutionId(scheduleId, institutionId)){
             throw new ResourceNotFoundException("Schedule", scheduleId);
         }
 
@@ -91,12 +92,12 @@ public class ScheduleEntryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleEntryResponse> findByScheduleAndProfessor(Long scheduleId, Long professorId){
-        if(!scheduleRepository.existsById(scheduleId)){
+    public List<ScheduleEntryResponse> findByScheduleAndProfessor(Long scheduleId, Long professorId, Long institutionId){
+        if(!scheduleRepository.existsByIdAndInstitutionId(scheduleId, institutionId)){
             throw new ResourceNotFoundException("Schedule", scheduleId);
         }
 
-        if(!professorRepository.existsById(professorId)){
+        if(!professorRepository.existsByIdAndInstitutionId(professorId, institutionId)){
             throw new ResourceNotFoundException("Professor", professorId);
         }
 
@@ -107,12 +108,12 @@ public class ScheduleEntryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleEntryResponse> findByScheduleAndClassroom(Long scheduleId, Long classroomId){
-        if(!scheduleRepository.existsById(scheduleId)){
+    public List<ScheduleEntryResponse> findByScheduleAndClassroom(Long scheduleId, Long classroomId, Long institutionId){
+        if(!scheduleRepository.existsByIdAndInstitutionId(scheduleId, institutionId)){
             throw new ResourceNotFoundException("Schedule", scheduleId);
         }
 
-        if(!classroomRepository.existsById(classroomId)){
+        if(!classroomRepository.existsByIdAndInstitutionId(classroomId, institutionId)){
             throw new ResourceNotFoundException("Classroom", classroomId);
         }
 
@@ -123,8 +124,8 @@ public class ScheduleEntryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduleEntryResponse> findByScheduleAndDayOfWeek(Long scheduleId, DayOfWeek dayOfWeek){
-        if(!scheduleRepository.existsById(scheduleId)){
+    public List<ScheduleEntryResponse> findByScheduleAndDayOfWeek(Long scheduleId, DayOfWeek dayOfWeek, Long institutionId){
+        if(!scheduleRepository.existsByIdAndInstitutionId(scheduleId, institutionId)){
             throw new ResourceNotFoundException("Schedule", scheduleId);
         }
 

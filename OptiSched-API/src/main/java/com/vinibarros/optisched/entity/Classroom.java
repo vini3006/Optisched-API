@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "classroom")
+@Table(name = "classroom", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_classroom_per_institution", columnNames = {"institution_id", "number"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,11 +20,15 @@ public class Classroom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String number;
 
     @Column(nullable = false)
     private Integer capacity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @OneToMany(mappedBy = "classroom")
     private Set<ScheduleEntry> scheduleEntries = new HashSet<>();

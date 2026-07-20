@@ -2,13 +2,11 @@ package com.vinibarros.optisched.service;
 
 import com.vinibarros.optisched.dto.request.ProfessorQualificationRequest;
 import com.vinibarros.optisched.dto.response.ProfessorQualificationResponse;
-import com.vinibarros.optisched.entity.Professor;
-import com.vinibarros.optisched.entity.ProfessorQualification;
-import com.vinibarros.optisched.entity.ProfessorQualificationId;
-import com.vinibarros.optisched.entity.Subject;
+import com.vinibarros.optisched.entity.*;
 import com.vinibarros.optisched.exception.DuplicateResourceException;
 import com.vinibarros.optisched.exception.ResourceNotFoundException;
 import com.vinibarros.optisched.mapper.ProfessorQualificationMapper;
+import com.vinibarros.optisched.repository.InstitutionRepository;
 import com.vinibarros.optisched.repository.ProfessorQualificationRepository;
 import com.vinibarros.optisched.repository.ProfessorRepository;
 import com.vinibarros.optisched.repository.SubjectRepository;
@@ -23,85 +21,91 @@ public class ProfessorQualificationService {
     private final ProfessorQualificationRepository qualificationRepository;
     private final ProfessorRepository professorRepository;
     private final SubjectRepository subjectRepository;
+    private final InstitutionRepository institutionRepository;
     private final ProfessorQualificationMapper qualificationMapper;
 
-    public ProfessorQualificationService (ProfessorQualificationRepository qualificationRepository, ProfessorRepository professorRepository, SubjectRepository subjectRepository, ProfessorQualificationMapper qualificationMapper){
+    public ProfessorQualificationService (ProfessorQualificationRepository qualificationRepository, ProfessorRepository professorRepository, SubjectRepository subjectRepository, InstitutionRepository institutionRepository, ProfessorQualificationMapper qualificationMapper){
         this.qualificationRepository = qualificationRepository;
         this.professorRepository = professorRepository;
         this.subjectRepository = subjectRepository;
+        this.institutionRepository = institutionRepository;
         this.qualificationMapper = qualificationMapper;
     }
 
     @Transactional
-    public ProfessorQualificationResponse create(ProfessorQualificationRequest request){
+    public ProfessorQualificationResponse create(ProfessorQualificationRequest request, Long institutionId){
         ProfessorQualificationId id = new ProfessorQualificationId(request.professorId(), request.subjectId());
 
-        if(qualificationRepository.existsById(id)) {
+        if(qualificationRepository.existsByIdAndInstitutionId(id, institutionId)) {
             throw new DuplicateResourceException("ProfessorQualification already exists for professorId=" + request.professorId() + " and subjectId=" + request.subjectId());
         }
 
-        Professor professor = professorRepository.findById(request.professorId())
+        Professor professor = professorRepository.findByIdAndInstitutionId(request.professorId(), institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Professor", request.professorId()));
 
-        Subject subject = subjectRepository.findById(request.subjectId())
+        Subject subject = subjectRepository.findByIdAndInstitutionId(request.subjectId(), institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject", request.subjectId()));
 
-        ProfessorQualification professorQualification = qualificationMapper.toEntity(professor, subject);
+        Institution institution = institutionRepository.findById(institutionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution", institutionId));
+
+        ProfessorQualification professorQualification = qualificationMapper.toEntity(professor, subject, institution);
         ProfessorQualification saved = qualificationRepository.save(professorQualification);
         return qualificationMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorQualificationResponse> findAll() {
-        return qualificationRepository.findAll()
+    public List<ProfessorQualificationResponse> findAll(Long institutionId) {
+        return qualificationRepository.findAllByInstitutionId(institutionId)
                 .stream()
                 .map(qualificationMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorQualificationResponse> findByProfessor(Long professorId){
-        if(!professorRepository.existsById(professorId)) {
+    public List<ProfessorQualificationResponse> findByProfessor(Long professorId, Long institutionId){
+        if(!professorRepository.existsByIdAndInstitutionId(professorId, institutionId)) {
             throw new ResourceNotFoundException("Professor", professorId);
         }
 
-        return qualificationRepository.findByProfessorId(professorId)
+        return qualificationRepository.findById_ProfessorIdAndInstitutionId(professorId, institutionId)
                 .stream()
                 .map(qualificationMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorQualificationResponse> findBySubject(Long subjectId){
-        if(!subjectRepository.existsById(subjectId)){
+    public List<ProfessorQualificationResponse> findBySubject(Long subjectId, Long institutionId){
+        if(!subjectRepository.existsByIdAndInstitutionId(subjectId, institutionId)){
             throw new ResourceNotFoundException("Subject", subjectId);
         }
 
-        return qualificationRepository.findBySubjectId(subjectId)
+        return qualificationRepository.findById_SubjectIdAndInstitutionId(subjectId, institutionId)
                 .stream()
                 .map(qualificationMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorQualificationResponse> findByProfessorAndSubject(Long professorId, Long subjectId){
+    public List<ProfessorQualificationResponse> findByProfessorAndSubject(Long professorId, Long subjectId, Long institutionId){
         ProfessorQualificationId id = new ProfessorQualificationId(professorId, subjectId);
-        if (!qualificationRepository.existsById(id)) {
+
+        if (!qualificationRepository.existsByIdAndInstitutionId(id, institutionId)) {
             throw new ResourceNotFoundException(
                     "ProfessorQualification not found for professorId=" + professorId + " and subjectId=" + subjectId
             );
         }
 
-        return qualificationRepository.findByProfessorIdAndSubjectId(professorId, subjectId)
+        return qualificationRepository.findById_ProfessorIdAndId_SubjectIdAndInstitutionId(professorId, subjectId, institutionId)
                 .stream()
                 .map(qualificationMapper::toResponse)
                 .toList();
     }
 
     @Transactional
-    public void delete(Long professorId, Long subjectId) {
+    public void delete(Long professorId, Long subjectId, Long institutionId) {
         ProfessorQualificationId id = new ProfessorQualificationId(professorId, subjectId);
-        if (!qualificationRepository.existsById(id)) {
+        if (!qualificationRepository.existsByIdAndInstitutionId(id, institutionId)) {
             throw new ResourceNotFoundException(
                     "ProfessorQualification not found for professorId=" + professorId + " and subjectId=" + subjectId
             );

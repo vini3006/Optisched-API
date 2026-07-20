@@ -11,7 +11,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "semester")
+@Table(name = "semester", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_semester_per_institution", columnNames = {"institution_id", "year", "term"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +29,10 @@ public class Semester {
 
     @Column(nullable = false)
     private Term term;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @OneToMany(mappedBy = "semester")
     private Set<SubjectOffering> offerings = new HashSet<>();

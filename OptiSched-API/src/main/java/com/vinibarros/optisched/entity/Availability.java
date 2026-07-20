@@ -17,13 +17,17 @@ public class Availability {
     @EmbeddedId
     private AvailabilityId id = new AvailabilityId();
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("professorId")
     @JoinColumn(name = "professor_id")
     private Professor professor;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("timeSlotId")
     @JoinColumn(name = "time_slot_id")
     private TimeSlot timeSlot;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 }

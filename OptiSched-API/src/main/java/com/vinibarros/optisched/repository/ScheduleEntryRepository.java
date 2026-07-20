@@ -6,23 +6,31 @@ import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleEntryRepository extends JpaRepository<ScheduleEntry, Long> {
+    Optional<ScheduleEntry> findByIdAndInstitutionId(Long id, Long institutionId);
+
     List<ScheduleEntry> findByScheduleId(Long scheduleId);
     List<ScheduleEntry> findByScheduleIdAndProfessorId(Long scheduleId, Long professorId);
+
     List<ScheduleEntry> findByScheduleIdAndClassroomId(Long scheduleId, Long classroomId);
+
     List<ScheduleEntry> findByScheduleIdAndTimeSlotDayOfWeek(Long scheduleId, DayOfWeek dayOfWeek);
+
     boolean existsByScheduleIdAndClassroomIdAndTimeSlotId(
             Long scheduleId,
             Long classroomId,
             Long timeSlotId
     );
+
     boolean existsByScheduleIdAndProfessorIdAndTimeSlotId(
             Long scheduleId,
             Long professorId,
             Long timeSlotId
     );
+
     boolean existsByScheduleIdAndProfessorIdAndSubjectOfferingIdAndClassroomIdAndTimeSlotId(
             Long scheduleId,
             Long professorId,

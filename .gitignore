@@ -4,6 +4,8 @@
 # ==========================
 .env
 .env.*
+app.key
+app.pub
 
 # Keep example environment file
 !.env.example

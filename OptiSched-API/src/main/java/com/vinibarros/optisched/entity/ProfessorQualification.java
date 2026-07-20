@@ -17,13 +17,17 @@ public class ProfessorQualification {
     @EmbeddedId
     private ProfessorQualificationId id = new ProfessorQualificationId();
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @MapsId("professorId")
     @JoinColumn(name = "professor_id")
     private Professor professor;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @MapsId("subjectId")
     @JoinColumn(name = "subject_id")
     private Subject subject;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 }

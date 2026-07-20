@@ -17,14 +17,13 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
@@ -34,6 +33,10 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScheduleStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @OneToMany(mappedBy = "schedule")
     private Set<ScheduleEntry> scheduleEntries = new HashSet<>();

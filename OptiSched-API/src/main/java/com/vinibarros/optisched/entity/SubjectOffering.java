@@ -12,8 +12,8 @@ import java.util.Set;
 @Entity
 @Table(
         name = "subject_offering",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"course_id", "subject_id", "semester_id", "section"}
+        uniqueConstraints = @UniqueConstraint(name = "unique_subject_offering_per_institution",
+                columnNames = {"course_id", "subject_id", "semester_id", "section", "institution_id"}
         )
 )
 @Getter
@@ -26,15 +26,15 @@ public class SubjectOffering {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
@@ -46,6 +46,10 @@ public class SubjectOffering {
 
     @Column(name = "recommended_semester")
     private Integer recommendedSemester;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @OneToMany(mappedBy = "subjectOffering")
     private Set<ScheduleEntry> scheduleEntries = new HashSet<>();

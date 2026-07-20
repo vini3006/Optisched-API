@@ -26,6 +26,7 @@ public class ScheduleGenerationService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleMapper scheduleMapper;
     private final ScheduleEntryRepository scheduleEntryRepository;
+    private final InstitutionRepository institutionRepository;
     private final OptimizationRequestMapper requestMapper;
     private final OptimizerClient optimizerClient;
 
@@ -38,6 +39,7 @@ public class ScheduleGenerationService {
             ScheduleRepository scheduleRepository,
             ScheduleMapper scheduleMapper,
             ScheduleEntryRepository scheduleEntryRepository,
+            InstitutionRepository institutionRepository,
             OptimizationRequestMapper requestMapper,
             OptimizerClient optimizerClient
     ) {
@@ -49,13 +51,14 @@ public class ScheduleGenerationService {
         this.scheduleRepository = scheduleRepository;
         this.scheduleMapper = scheduleMapper;
         this.scheduleEntryRepository = scheduleEntryRepository;
+        this.institutionRepository = institutionRepository;
         this.requestMapper = requestMapper;
         this.optimizerClient = optimizerClient;
     }
 
     @Transactional
-    public ScheduleResponse generateSchedule(Long semesterId) {
-        Semester semester = semesterRepository.findById(semesterId)
+    public ScheduleResponse generateSchedule(Long semesterId, Long institutionId) {
+        Semester semester = semesterRepository.findByIdAndInstitutionId(semesterId, institutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Semester", semesterId));
 
         List<SubjectOffering> offerings = subjectOfferingRepository.findBySemesterId(semesterId).stream()
@@ -68,9 +71,9 @@ public class ScheduleGenerationService {
             );
         }
 
-        List<Professor> professors = professorRepository.findAll();
-        List<Classroom> classrooms = classroomRepository.findAll();
-        List<TimeSlot> timeSlots = timeSlotRepository.findAll();
+        List<Professor> professors = professorRepository.findAllByInstitutionId(institutionId);
+        List<Classroom> classrooms = classroomRepository.findAllByInstitutionId(institutionId);
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllByInstitutionId(institutionId);
 
         OptimizationRequest request = requestMapper.buildRequest(
                 professors, offerings, classrooms, timeSlots, ObjectiveWeightsInput.defaults()
@@ -79,10 +82,13 @@ public class ScheduleGenerationService {
         OptimizationResponse response = optimizerClient.optimize(request);
 
         if (response == null || response.scheduleEntries() == null) {
-            throw new NoScheduleEntriesException("The optimizer did not found any feasible entry.   ");
+            throw new NoScheduleEntriesException("The optimizer did not found any feasible entry.");
         }
 
-        Schedule schedule = scheduleMapper.toEntity(semester);
+        Institution institution = institutionRepository.findById(institutionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution", institutionId));
+
+        Schedule schedule = scheduleMapper.toEntity(semester, institution);
         schedule.setGeneratedAt(LocalDateTime.now());
         schedule.setStatus(ScheduleStatus.ACTIVE);
 

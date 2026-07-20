@@ -5,21 +5,20 @@ import com.vinibarros.optisched.dto.optimization.*;
 import com.vinibarros.optisched.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
 public class OptimizationRequestMapper {
 
     public ProfessorInput toProfessorInput(Professor professor) {
-        List<Long> qualifiedSubjectIds = professor.getQualifications()
-                .stream()
-                .map(q -> q.getSubject().getId())
-                .toList();
+        List<Long> qualifiedSubjectIds = professor.getQualifications() != null
+                ? professor.getQualifications().stream().map(q -> q.getSubject().getId()).toList()
+                : Collections.emptyList();
 
-        List<Long> availableTimeSlotIds = professor.getAvailabilities()
-                .stream()
-                .map(a -> a.getTimeSlot().getId())
-                .toList();
+        List<Long> availableTimeSlotIds = professor.getAvailabilities() != null
+                ? professor.getAvailabilities().stream().map(a -> a.getTimeSlot().getId()).toList()
+                : Collections.emptyList();
 
         return new ProfessorInput(professor.getId(), qualifiedSubjectIds, availableTimeSlotIds);
     }

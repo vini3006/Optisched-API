@@ -9,20 +9,31 @@ import org.springframework.stereotype.Repository;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
-    boolean existsByDayOfWeekAndStartTimeAndEndTime(DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime);
-    List<TimeSlot> findByDayOfWeek(DayOfWeek dayOfWeek);
+    boolean existsByIdAndInstitutionId(Long id, Long institutionId);
+
+    Optional<TimeSlot> findByIdAndInstitutionId(Long id, Long institutionId);
+
+    boolean existsByDayOfWeekAndStartTimeAndEndTimeAndInstitutionId(DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime, Long institutionId);
+
+    List<TimeSlot> findAllByInstitutionId(Long institutionId);
+
+    List<TimeSlot> findByDayOfWeekAndInstitutionId(DayOfWeek dayOfWeek, Long institutionId);
+
     @Query("""
         SELECT COUNT(t) > 0
         FROM TimeSlot t
-        WHERE :startTime < t.endTime
+        WHERE t.institution.id = :institutionId
+          AND :startTime < t.endTime
           AND :endTime > t.startTime
           AND NOT (t.startTime = :startTime AND t.endTime = :endTime)
     """)
     boolean existsOverlappingTimeSlot(
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("endTime") LocalTime endTime,
+            @Param("institutionId") Long institutionId
     );
 }

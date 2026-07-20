@@ -5,7 +5,13 @@ import com.vinibarros.optisched.enums.Term;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, Long> {
-    boolean existsByYearAndTerm(Integer year, Term term);
+    boolean existsByIdAndInstitutionId(Long id, Long institutionId);
+    Optional<Semester> findByIdAndInstitutionId(Long id, Long institutionId);
+    List<Semester> findAllByInstitutionId(Long institutionId);
+    boolean existsByYearAndTermAndInstitutionId(Integer year, Term term, Long institutionId);
 }

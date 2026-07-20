@@ -33,6 +33,10 @@ public class TimeSlot {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
+
     @OneToMany(mappedBy = "timeSlot")
     private Set<Availability> availabilities = new HashSet<>();
 

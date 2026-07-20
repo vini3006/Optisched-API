@@ -10,7 +10,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "subject")
+@Table(name = "subject", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_subject_code_per_institution", columnNames = {"institution_id", "code"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,6 +32,10 @@ public class Subject {
 
     @Column(nullable = false)
     private Integer workload; //Workload refers to the weekly amount of classes
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProfessorQualification> qualifications = new HashSet<>();
